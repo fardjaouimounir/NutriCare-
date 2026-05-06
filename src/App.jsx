@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -7,7 +8,7 @@ import AdminLayout from './layouts/AdminLayout';
 import AuthLayout from './layouts/AuthLayout';
 import PublicLayout from './layouts/PublicLayout';
 
-// Lazy load pages for performance
+// Lazy load pages
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const AuthPage = React.lazy(() => import('./pages/AuthPage'));
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
@@ -32,59 +33,93 @@ const AdminCommunityPage = React.lazy(() => import('./pages/admin/AdminCommunity
 const AdminNotificationsPage = React.lazy(() => import('./pages/admin/AdminNotificationsPage'));
 const AdminReportsPage = React.lazy(() => import('./pages/admin/AdminReportsPage'));
 
-// Fallback loader
+// Loading spinner
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-neutral">
     <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
   </div>
 );
 
+// Protected route — requires login
+function PrivateRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  return user ? children : <Navigate to="/login" replace />;
+}
+
+// Admin route — requires admin role
+function AdminRoute({ children }) {
+  const { user, profile, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (profile && profile.role !== 'admin') return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+// Public-only route — redirect logged-in users to the right place
+function GuestRoute({ children }) {
+  const { user, profile, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (!user) return children;
+  // Redirect based on role
+  if (profile?.role === 'admin') return <Navigate to="/admin" replace />;
+  return <Navigate to="/dashboard" replace />;
+}
+
+function AppRoutes() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Auth & Onboarding */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<GuestRoute><AuthPage type="login" /></GuestRoute>} />
+          <Route path="/signup" element={<GuestRoute><AuthPage type="signup" /></GuestRoute>} />
+          <Route path="/onboarding" element={<PrivateRoute><OnboardingPage /></PrivateRoute>} />
+        </Route>
+
+        {/* Admin Layout */}
+        <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/content" element={<AdminContentPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
+          <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+          <Route path="/admin/specialists" element={<AdminSpecialistsPage />} />
+          <Route path="/admin/community" element={<AdminCommunityPage />} />
+          <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
+        </Route>
+
+        {/* Public Layout */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+        </Route>
+
+        {/* Main User Layout — all protected */}
+        <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/nutrition" element={<NutritionPage />} />
+          <Route path="/recipes" element={<RecipesPage />} />
+          <Route path="/hydration" element={<HydrationPage />} />
+          <Route path="/journal" element={<JournalPage />} />
+          <Route path="/wellness" element={<WellnessPage />} />
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/advice" element={<AdvicePage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+        </Route>
+      </Routes>
+    </Suspense>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Auth & Onboarding without standard layout */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<AuthPage type="login" />} />
-            <Route path="/signup" element={<AuthPage type="signup" />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-          </Route>
-
-          {/* Admin Layout */}
-          <Route element={<AdminLayout />}>
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/users" element={<AdminUsersPage />} />
-            <Route path="/admin/content" element={<AdminContentPage />} />
-            <Route path="/admin/settings" element={<AdminSettingsPage />} />
-            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
-            <Route path="/admin/specialists" element={<AdminSpecialistsPage />} />
-            <Route path="/admin/community" element={<AdminCommunityPage />} />
-            <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
-            <Route path="/admin/reports" element={<AdminReportsPage />} />
-          </Route>
-
-          {/* Public Layout */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/about" element={<AboutPage />} />
-          </Route>
-
-          {/* Main User Layout */}
-          <Route element={<MainLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/nutrition" element={<NutritionPage />} />
-            <Route path="/recipes" element={<RecipesPage />} />
-            <Route path="/hydration" element={<HydrationPage />} />
-            <Route path="/journal" element={<JournalPage />} />
-            <Route path="/wellness" element={<WellnessPage />} />
-            <Route path="/community" element={<CommunityPage />} />
-            <Route path="/advice" element={<AdvicePage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-          </Route>
-        </Routes>
-      </Suspense>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
