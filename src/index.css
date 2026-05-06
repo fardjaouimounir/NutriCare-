@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #A64B62;
+    --color-secondary: #F1F3F5;
+    --color-accent: #5E6D7E;
+    --color-neutral: #FDFDFD;
+    --color-dark: #1A1C1E;
+    --color-success: #4A7C59;
+    --color-warning: #C68B59;
+    --color-text-dark: #212529;
+    --color-text-muted: #6C757D;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-neutral text-text-dark font-ui antialiased;
+    direction: rtl; /* Default RTL for Arabic */
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/60 backdrop-blur-[8px] border border-white/40 shadow-sm ring-1 ring-dark/5;
+  }
+
+  .glass-card {
+    @apply glass rounded-card;
+  }
+
+  .glass-component {
+    @apply glass rounded-component;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white shadow-sm transition-all duration-300 font-semibold
+           rounded-full px-6 py-3 outline-none focus:ring-4 focus:ring-primary/20 
+           hover:bg-primary/90 hover:shadow-md active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply border border-dark/10 text-text-dark hover:bg-dark/5 
+           transition-all duration-300 font-semibold rounded-full px-6 py-3
+           outline-none focus:ring-4 focus:ring-dark/10;
+  }
+  
+  .input-field {
+    @apply w-full bg-white/50 backdrop-blur-sm border border-primary/20 text-text-dark placeholder:text-text-muted
+           rounded-xl px-4 py-3 outline-none focus:border-primary focus:ring-2 
+           focus:ring-primary/20 transition-all duration-300;
+  }
+  
+  /* LTR overrides */
+  html[dir="ltr"] body {
+    direction: ltr;
+  }
+  /* LTR within RTL block fix */
+  .force-ltr {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: embed;
+  }
+
+  /* Font fallbacks based on lang */
+  html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] h3, html[lang="ar"] h4, html[lang="ar"] h5, html[lang="ar"] h6, html[lang="ar"] .font-display {
+     font-family: "Noto Kufi Arabic", serif;
+  }
+  html[lang="ar"] body, html[lang="ar"] .font-ui {
+     font-family: "Noto Kufi Arabic", sans-serif;
+  }
+}
+
+.architectural-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
