@@ -1,205 +1,331 @@
-import React, { useState } from 'react';
-import {
-  FileText, MessageSquare, Utensils, AlertTriangle,
-  CheckCircle, XCircle, Eye, Trash2, Clock, ThumbsUp,
-  Flag, Search, Filter
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit3, Trash2, Eye, EyeOff, Search, X, ChevronDown } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
-const PENDING_RECIPES = [
-  { id: 1, title: 'حساء العدس المقوي بالكركم', author: 'مريم خالد', date: '13 أبريل 2026', category: 'وجبة رئيسية', status: 'قيد المراجعة' },
-  { id: 2, title: 'سلطة الأفوكادو بزيت الزيتون', author: 'سارة أحمد', date: '12 أبريل 2026', category: 'سلطات', status: 'قيد المراجعة' },
-  { id: 3, title: 'عصير الجزر والزنجبيل المقوي للمناعة', author: 'زينب حسن', date: '11 أبريل 2026', category: 'مشروبات', status: 'قيد المراجعة' },
-];
+const CATEGORIES = ['التغذية', 'الأعراض الجانبية', 'الوصفات', 'النشاط البدني', 'الصحة النفسية', 'علاجات كيماوية'];
 
-const COMMUNITY_REPORTS = [
-  { id: 1, type: 'محتوى مسيء', reporter: 'عائشة نبيل', content: 'تعليق في منتدى الدعم يحتوي على معلومات طبية مضللة...', date: '14 أبريل 2026', severity: 'عالي' },
-  { id: 2, type: 'سلوك غير لائق', reporter: 'فاطمة الزهراء', content: 'منشور يحتوي على إعلانات تجارية غير مأذون بها...', date: '13 أبريل 2026', severity: 'متوسط' },
-  { id: 3, type: 'محتوى مزيف', reporter: 'خديجة علي', content: 'صورة منتج ادعاء بأنه يشفي من السرطان بدون دليل علمي...', date: '12 أبريل 2026', severity: 'عالي' },
-];
-
-const PUBLISHED_ADVICE = [
-  { id: 1, title: 'أهمية التغذية خلال العلاج الكيماوي', author: 'د. نورة الشامي', views: 2840, likes: 412, date: '10 أبريل 2026', status: 'منشور' },
-  { id: 2, title: 'الأطعمة المفيدة لتعزيز المناعة', author: 'د. رانيا فهمي', views: 1930, likes: 318, date: '8 أبريل 2026', status: 'منشور' },
-  { id: 3, title: 'التوازن الغذائي في مرحلة التعافي', author: 'د. نورة الشامي', views: 1200, likes: 198, date: '5 أبريل 2026', status: 'منشور' },
-  { id: 4, title: 'الترطيب وأهميته خلال العلاج الإشعاعي', author: 'د. أمل رشيد', views: 890, likes: 145, date: '1 أبريل 2026', status: 'أرشيف' },
-];
-
-const severityConfig = {
-  'عالي': { bg: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' },
-  'متوسط': { bg: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-500' },
-  'منخفض': { bg: 'bg-slate-50 text-slate-600 border-slate-200', dot: 'bg-slate-400' },
-};
-
-function ActionButton({ icon: Icon, label, color, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      title={label}
-      className={`p-1.5 rounded-lg transition-colors ${color}`}
-    >
-      <Icon size={15} />
-    </button>
-  );
-}
+const emptyForm = { title: '', excerpt: '', content: '', category: 'التغذية', author_name: '', image_url: '', read_time: '5 دقائق', is_published: false };
 
 export default function AdminContentPage() {
-  const [activeTab, setActiveTab] = useState('recipes');
+  const { user } = useAuth();
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [tab, setTab] = useState('articles'); // articles | recipes
 
-  const tabs = [
-    { id: 'recipes', label: 'وصفات للمراجعة', icon: Utensils, count: PENDING_RECIPES.length },
-    { id: 'reports', label: 'بلاغات المجتمع', icon: Flag, count: COMMUNITY_REPORTS.length },
-    { id: 'advice', label: 'المقالات والنصائح', icon: FileText, count: PUBLISHED_ADVICE.length },
-  ];
+  // ── Recipes state ──
+  const [recipes, setRecipes] = useState([]);
+  const [recipeForm, setRecipeForm] = useState({
+    title: '', description: '', prep_time: '30 دقيقة', difficulty: 'سهل',
+    tags: '', calories: '', protein: '', carbs: '', fat: '', image_url: '', is_approved: false,
+    ingredients: '', steps: '',
+  });
+  const [editingRecipe, setEditingRecipe] = useState(null);
+  const [showRecipeForm, setShowRecipeForm] = useState(false);
+
+  const fetchArticles = async () => {
+    const { data } = await supabase.from('articles').select('*').order('created_at', { ascending: false });
+    setArticles(data || []);
+    setLoading(false);
+  };
+
+  const fetchRecipes = async () => {
+    const { data } = await supabase.from('recipes').select('*').order('created_at', { ascending: false });
+    setRecipes(data || []);
+  };
+
+  useEffect(() => { fetchArticles(); fetchRecipes(); }, []);
+
+  // ── Article CRUD ──
+  const saveArticle = async () => {
+    if (!form.title || saving) return;
+    setSaving(true);
+    if (editing) {
+      await supabase.from('articles').update({ ...form, author_id: user.id }).eq('id', editing);
+    } else {
+      await supabase.from('articles').insert({ ...form, author_id: user.id });
+    }
+    setForm(emptyForm); setEditing(null); setShowForm(false);
+    setSaving(false); fetchArticles();
+  };
+
+  const togglePublish = async (article) => {
+    await supabase.from('articles').update({ is_published: !article.is_published }).eq('id', article.id);
+    fetchArticles();
+  };
+
+  const deleteArticle = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا المقال؟')) return;
+    await supabase.from('articles').delete().eq('id', id);
+    fetchArticles();
+  };
+
+  const openEdit = (article) => {
+    setForm({ title: article.title, excerpt: article.excerpt || '', content: article.content || '', category: article.category, author_name: article.author_name || '', image_url: article.image_url || '', read_time: article.read_time || '5 دقائق', is_published: article.is_published });
+    setEditing(article.id); setShowForm(true);
+  };
+
+  // ── Recipe CRUD ──
+  const saveRecipe = async () => {
+    if (!recipeForm.title || saving) return;
+    setSaving(true);
+    const payload = {
+      ...recipeForm,
+      calories: parseInt(recipeForm.calories) || 0,
+      protein: parseFloat(recipeForm.protein) || 0,
+      carbs: parseFloat(recipeForm.carbs) || 0,
+      fat: parseFloat(recipeForm.fat) || 0,
+      tags: recipeForm.tags ? recipeForm.tags.split(',').map(t => t.trim()) : [],
+      ingredients: recipeForm.ingredients ? recipeForm.ingredients.split('\n').filter(Boolean) : [],
+      steps: recipeForm.steps ? recipeForm.steps.split('\n').filter(Boolean) : [],
+      author_id: user.id,
+    };
+    if (editingRecipe) {
+      await supabase.from('recipes').update(payload).eq('id', editingRecipe);
+    } else {
+      await supabase.from('recipes').insert(payload);
+    }
+    setRecipeForm({ title: '', description: '', prep_time: '30 دقيقة', difficulty: 'سهل', tags: '', calories: '', protein: '', carbs: '', fat: '', image_url: '', is_approved: false, ingredients: '', steps: '' });
+    setEditingRecipe(null); setShowRecipeForm(false);
+    setSaving(false); fetchRecipes();
+  };
+
+  const toggleApprove = async (recipe) => {
+    await supabase.from('recipes').update({ is_approved: !recipe.is_approved }).eq('id', recipe.id);
+    fetchRecipes();
+  };
+
+  const deleteRecipe = async (id) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذه الوصفة؟')) return;
+    await supabase.from('recipes').delete().eq('id', id);
+    fetchRecipes();
+  };
+
+  const openEditRecipe = (r) => {
+    setRecipeForm({
+      title: r.title, description: r.description || '', prep_time: r.prep_time, difficulty: r.difficulty,
+      tags: (r.tags || []).join(', '), calories: r.calories, protein: r.protein, carbs: r.carbs, fat: r.fat,
+      image_url: r.image_url || '', is_approved: r.is_approved,
+      ingredients: (r.ingredients || []).join('\n'), steps: (r.steps || []).join('\n'),
+    });
+    setEditingRecipe(r.id); setShowRecipeForm(true);
+  };
+
+  const filteredArticles = articles.filter(a => !search || a.title?.toLowerCase().includes(search.toLowerCase()));
+  const filteredRecipes = recipes.filter(r => !search || r.title?.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">إدارة المحتوى</h1>
-        <p className="text-slate-500 text-sm mt-0.5">مراجعة وإدارة جميع محتوى المنصة</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">إدارة المحتوى</h1>
+          <p className="text-slate-500 text-sm mt-0.5">إضافة وتعديل المقالات والوصفات</p>
+        </div>
+        <button onClick={() => tab === 'articles' ? setShowForm(true) : setShowRecipeForm(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm">
+          <Plus size={16} /> {tab === 'articles' ? 'مقال جديد' : 'وصفة جديدة'}
+        </button>
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { label: 'وصفات بانتظار الموافقة', value: PENDING_RECIPES.length, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'بلاغات تحتاج مراجعة', value: COMMUNITY_REPORTS.filter(r => r.severity === 'عالي').length, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50' },
-          { label: 'مقالات منشورة', value: PUBLISHED_ADVICE.filter(a => a.status === 'منشور').length, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-        ].map((s, i) => (
-          <div key={i} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-            <div className={`w-11 h-11 rounded-xl ${s.bg} ${s.color} flex items-center justify-center shrink-0`}>
-              <s.icon size={22} />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800">{s.value}</p>
-              <p className="text-xs text-slate-500 font-medium">{s.label}</p>
-            </div>
-          </div>
+      {/* Tabs */}
+      <div className="flex gap-2 bg-slate-100 p-1 rounded-xl w-fit">
+        {[{ id: 'articles', label: `المقالات (${articles.length})` }, { id: 'recipes', label: `الوصفات (${recipes.length})` }].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)}
+            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${tab === t.id ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+            {t.label}
+          </button>
         ))}
       </div>
 
-      {/* Tabs & Content */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        {/* Tab Bar */}
-        <div className="flex border-b border-slate-100 bg-slate-50/50">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2.5 px-6 py-4 text-sm font-semibold transition-all border-b-2 -mb-px ${
-                activeTab === tab.id
-                  ? 'border-rose-500 text-rose-600 bg-white'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <tab.icon size={17} />
-              <span>{tab.label}</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${activeTab === tab.id ? 'bg-rose-100 text-rose-600' : 'bg-slate-200 text-slate-500'}`}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div className="p-5">
-          {/* Pending Recipes Tab */}
-          {activeTab === 'recipes' && (
-            <div className="space-y-3">
-              {PENDING_RECIPES.map(recipe => (
-                <div key={recipe.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                      <Utensils size={20} />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-800 text-sm group-hover:text-rose-600 transition-colors">{recipe.title}</p>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs text-slate-400">بقلم: {recipe.author}</span>
-                        <span className="text-xs text-slate-300">•</span>
-                        <span className="text-xs text-slate-400">{recipe.date}</span>
-                        <span className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md font-medium">{recipe.category}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ActionButton icon={Eye} label="مراجعة" color="text-slate-500 hover:bg-slate-100 hover:text-slate-800" />
-                    <ActionButton icon={CheckCircle} label="موافقة" color="text-emerald-600 hover:bg-emerald-50" />
-                    <ActionButton icon={XCircle} label="رفض" color="text-red-500 hover:bg-red-50" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Community Reports Tab */}
-          {activeTab === 'reports' && (
-            <div className="space-y-3">
-              {COMMUNITY_REPORTS.map(report => {
-                const sev = severityConfig[report.severity] || severityConfig['منخفض'];
-                return (
-                  <div key={report.id} className="p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors group space-y-3">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-                          <Flag size={17} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-slate-800 text-sm">{report.type}</p>
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold border ${sev.bg}`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`}></span>
-                              {report.severity}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-400 mt-0.5">بلاغ من: {report.reporter} — {report.date}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <ActionButton icon={Eye} label="مراجعة" color="text-slate-500 hover:bg-slate-100 hover:text-slate-800" />
-                        <ActionButton icon={CheckCircle} label="تأكيد ومعالجة" color="text-emerald-600 hover:bg-emerald-50" />
-                        <ActionButton icon={XCircle} label="رفض البلاغ" color="text-slate-400 hover:bg-slate-100" />
-                      </div>
-                    </div>
-                    <p className="text-sm text-slate-500 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100 line-clamp-2">{report.content}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Published Advice Tab */}
-          {activeTab === 'advice' && (
-            <div className="space-y-3">
-              {PUBLISHED_ADVICE.map(article => (
-                <div key={article.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                      <FileText size={20} />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-800 text-sm group-hover:text-rose-600 transition-colors">{article.title}</p>
-                      <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <span className="text-xs text-slate-400">{article.author}</span>
-                        <span className="text-xs text-slate-300">•</span>
-                        <span className="flex items-center gap-1 text-xs text-slate-400"><Eye size={12} /> {article.views.toLocaleString()}</span>
-                        <span className="flex items-center gap-1 text-xs text-slate-400"><ThumbsUp size={12} /> {article.likes}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${article.status === 'منشور' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                          {article.status}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ActionButton icon={Eye} label="عرض" color="text-slate-500 hover:bg-slate-100 hover:text-slate-800" />
-                    <ActionButton icon={FileText} label="تعديل" color="text-blue-600 hover:bg-blue-50" />
-                    <ActionButton icon={Trash2} label="حذف" color="text-red-500 hover:bg-red-50" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="بحث..." className="w-full pr-9 pl-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 bg-white" />
       </div>
+
+      {/* ── Articles Table ── */}
+      {tab === 'articles' && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <table className="w-full">
+            <thead><tr className="border-b border-slate-100">
+              {['العنوان', 'التصنيف', 'الكاتب', 'وقت القراءة', 'الحالة', 'إجراءات'].map(h => (
+                <th key={h} className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+              ))}
+            </tr></thead>
+            <tbody className="divide-y divide-slate-50">
+              {loading ? (
+                <tr><td colSpan={6} className="text-center py-12 text-slate-400">جاري التحميل...</td></tr>
+              ) : filteredArticles.length === 0 ? (
+                <tr><td colSpan={6} className="text-center py-12 text-slate-400">لا توجد مقالات</td></tr>
+              ) : filteredArticles.map(a => (
+                <tr key={a.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {a.image_url && <img src={a.image_url} alt="" className="w-10 h-10 rounded-lg object-cover" />}
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800 line-clamp-1">{a.title}</p>
+                        <p className="text-xs text-slate-400 line-clamp-1">{a.excerpt}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold">{a.category}</span></td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{a.author_name || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-slate-500">{a.read_time}</td>
+                  <td className="px-4 py-3">
+                    <button onClick={() => togglePublish(a)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${a.is_published ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                      {a.is_published ? <><Eye size={12} /> منشور</> : <><EyeOff size={12} /> مسودة</>}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => openEdit(a)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Edit3 size={15} /></button>
+                      <button onClick={() => deleteArticle(a.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={15} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── Recipes Table ── */}
+      {tab === 'recipes' && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <table className="w-full">
+            <thead><tr className="border-b border-slate-100">
+              {['الوصفة', 'الوقت / الصعوبة', 'القيم الغذائية', 'الحالة', 'إجراءات'].map(h => (
+                <th key={h} className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+              ))}
+            </tr></thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredRecipes.length === 0 ? (
+                <tr><td colSpan={5} className="text-center py-12 text-slate-400">لا توجد وصفات</td></tr>
+              ) : filteredRecipes.map(r => (
+                <tr key={r.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {r.image_url && <img src={r.image_url} alt="" className="w-10 h-10 rounded-lg object-cover" />}
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{r.title}</p>
+                        <div className="flex gap-1 mt-1">{(r.tags || []).slice(0, 2).map(t => <span key={t} className="text-xs bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded">{t}</span>)}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{r.prep_time} · {r.difficulty}</td>
+                  <td className="px-4 py-3 text-xs text-slate-500">{r.calories} سعرة · {r.protein}غ بروتين</td>
+                  <td className="px-4 py-3">
+                    <button onClick={() => toggleApprove(r)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${r.is_approved ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                      {r.is_approved ? '✅ موافق عليها' : '⏳ قيد المراجعة'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => openEditRecipe(r)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Edit3 size={15} /></button>
+                      <button onClick={() => deleteRecipe(r.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={15} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── Article Form Modal ── */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-slate-800">{editing ? 'تعديل المقال' : 'مقال جديد'}</h2>
+              <button onClick={() => { setShowForm(false); setEditing(null); setForm(emptyForm); }} className="p-2 hover:bg-slate-100 rounded-lg"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <input placeholder="عنوان المقال *" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+              <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none bg-white">
+                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+              <div className="grid grid-cols-2 gap-3">
+                <input placeholder="اسم الكاتب" value={form.author_name} onChange={e => setForm(p => ({ ...p, author_name: e.target.value }))}
+                  className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                <input placeholder="وقت القراءة (مثال: 5 دقائق)" value={form.read_time} onChange={e => setForm(p => ({ ...p, read_time: e.target.value }))}
+                  className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+              </div>
+              <input placeholder="رابط الصورة" value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+              <textarea rows={2} placeholder="مقتطف قصير..." value={form.excerpt} onChange={e => setForm(p => ({ ...p, excerpt: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none" />
+              <textarea rows={6} placeholder="محتوى المقال الكامل..." value={form.content} onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none" />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.is_published} onChange={e => setForm(p => ({ ...p, is_published: e.target.checked }))} className="w-4 h-4 accent-rose-500" />
+                <span className="text-sm font-medium text-slate-700">نشر المقال مباشرةً</span>
+              </label>
+              <button onClick={saveArticle} disabled={!form.title || saving}
+                className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-semibold transition-colors disabled:opacity-50">
+                {saving ? 'جاري الحفظ...' : editing ? 'حفظ التعديلات' : 'إضافة المقال'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Recipe Form Modal ── */}
+      {showRecipeForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-slate-800">{editingRecipe ? 'تعديل الوصفة' : 'وصفة جديدة'}</h2>
+              <button onClick={() => { setShowRecipeForm(false); setEditingRecipe(null); }} className="p-2 hover:bg-slate-100 rounded-lg"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <input placeholder="اسم الوصفة *" value={recipeForm.title} onChange={e => setRecipeForm(p => ({ ...p, title: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+              <div className="grid grid-cols-2 gap-3">
+                <input placeholder="وقت التحضير" value={recipeForm.prep_time} onChange={e => setRecipeForm(p => ({ ...p, prep_time: e.target.value }))}
+                  className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                <select value={recipeForm.difficulty} onChange={e => setRecipeForm(p => ({ ...p, difficulty: e.target.value }))}
+                  className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none bg-white">
+                  {['سهل', 'متوسط', 'صعب'].map(d => <option key={d}>{d}</option>)}
+                </select>
+              </div>
+              <input placeholder="الوسوم (مفصولة بفاصلة: حساء, نباتي, ...)" value={recipeForm.tags} onChange={e => setRecipeForm(p => ({ ...p, tags: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+              <input placeholder="رابط الصورة" value={recipeForm.image_url} onChange={e => setRecipeForm(p => ({ ...p, image_url: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+              <div className="grid grid-cols-4 gap-3">
+                {[['calories', 'سعرات'], ['protein', 'بروتين'], ['carbs', 'كارب'], ['fat', 'دهون']].map(([k, l]) => (
+                  <input key={k} type="number" placeholder={l} value={recipeForm[k]} onChange={e => setRecipeForm(p => ({ ...p, [k]: e.target.value }))}
+                    className="border border-slate-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                ))}
+              </div>
+              <textarea rows={4} placeholder={"المكونات (كل مكون في سطر):\nكوب دقيق\n200 غ زبدة..."} value={recipeForm.ingredients} onChange={e => setRecipeForm(p => ({ ...p, ingredients: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none font-mono text-xs" />
+              <textarea rows={4} placeholder={"خطوات التحضير (كل خطوة في سطر):\nاخلطي المواد الجافة\nأضيفي الزبدة..."} value={recipeForm.steps} onChange={e => setRecipeForm(p => ({ ...p, steps: e.target.value }))}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none font-mono text-xs" />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={recipeForm.is_approved} onChange={e => setRecipeForm(p => ({ ...p, is_approved: e.target.checked }))} className="w-4 h-4 accent-rose-500" />
+                <span className="text-sm font-medium text-slate-700">نشر الوصفة مباشرةً</span>
+              </label>
+              <button onClick={saveRecipe} disabled={!recipeForm.title || saving}
+                className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-semibold transition-colors disabled:opacity-50">
+                {saving ? 'جاري الحفظ...' : editingRecipe ? 'حفظ التعديلات' : 'إضافة الوصفة'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -79,11 +79,34 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  // signIn: just does auth — onAuthStateChange handles profile fetch
+  // signIn: uses RPC to get role (SECURITY DEFINER → bypasses RLS reliably)
   const signIn = async ({ email, password }) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    return data;
+
+    let userProfile = null;
+    if (data.user) {
+      // 1. Get role via SECURITY DEFINER function (bypasses RLS — always works)
+      const { data: roleFromRpc } = await supabase.rpc('get_my_role');
+
+      // 2. Try to fetch full profile (may or may not work depending on RLS)
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .maybeSingle();
+
+      // 3. Merge: use RPC role as source of truth
+      const resolvedRole = roleFromRpc || profileData?.role || 'patient';
+      userProfile = {
+        ...(profileData || {}),
+        id: data.user.id,
+        role: resolvedRole,
+      };
+      setProfile(userProfile);
+    }
+
+    return { ...data, profile: userProfile };
   };
 
   const signOut = async () => {

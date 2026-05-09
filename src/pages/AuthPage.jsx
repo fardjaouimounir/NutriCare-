@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { Heart, User, Mail, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -121,7 +121,6 @@ export default function AuthPage({ type = 'login' }) {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [awaitingRedirect, setAwaitingRedirect] = useState(false);
 
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [signupData, setSignupData] = useState({
@@ -130,27 +129,17 @@ export default function AuthPage({ type = 'login' }) {
     dietaryRestrictions: [],
   });
 
-  // Watch for profile to load after signIn, then redirect based on role
-  useEffect(() => {
-    if (!awaitingRedirect) return;
-    if (authLoading) return;
-    // Profile loaded (or null) — redirect now
-    if (profile?.role === 'admin') {
-      navigate('/admin', { replace: true });
-    } else {
-      navigate('/dashboard', { replace: true });
-    }
-    setAwaitingRedirect(false);
-  }, [awaitingRedirect, authLoading, profile, navigate]);
-
-
   const handleLogin = async () => {
     setError('');
     setSubmitting(true);
     try {
-      await signIn({ email: loginData.email, password: loginData.password });
-      // Signal the useEffect to redirect once profile is loaded from onAuthStateChange
-      setAwaitingRedirect(true);
+      const result = await signIn({ email: loginData.email, password: loginData.password });
+      // Navigate based on role returned directly from signIn
+      if (result.profile?.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       setError('البريد الإلكتروني أو كلمة المرور غير صحيحة.');
     } finally {
@@ -232,8 +221,8 @@ export default function AuthPage({ type = 'login' }) {
                   value={loginData.email} onChange={e => setLoginData(p => ({ ...p, email: e.target.value }))} />
                 <Input label="كلمة المرور" type="password" icon={Lock} placeholder="••••••••"
                   value={loginData.password} onChange={e => setLoginData(p => ({ ...p, password: e.target.value }))} />
-                <Button fullWidth onClick={handleLogin} disabled={submitting || awaitingRedirect} className="py-4 text-lg shadow-xl shadow-primary/20 mt-4">
-                  {submitting ? 'جاري التحقق...' : awaitingRedirect ? 'جاري الدخول...' : 'تسجيل الدخول'}
+                <Button fullWidth onClick={handleLogin} disabled={submitting} className="py-4 text-lg shadow-xl shadow-primary/20 mt-4">
+                  {submitting ? 'جاري الدخول...' : 'تسجيل الدخول'}
                 </Button>
                 <div className="text-center pt-6">
                   <span className="text-text-muted font-medium">ليس لديك حساب؟ </span>
