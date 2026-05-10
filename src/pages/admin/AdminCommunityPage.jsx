@@ -38,7 +38,7 @@ export default function AdminCommunityPage() {
   };
 
   const filtered = posts.filter(p => {
-    if (search && !p.content?.includes(search) && !p.profiles?.full_name?.includes(search)) return false;
+    if (search && !p.body?.includes(search) && !p.profiles?.full_name?.includes(search)) return false;
     if (filter === 'pinned' && !p.is_pinned) return false;
     if (filter === 'anonymous' && !p.is_anonymous) return false;
     return true;
@@ -94,7 +94,7 @@ export default function AdminCommunityPage() {
                       </div>
                       {post.mood && <span className="text-lg" title={post.mood}>{moodEmoji[post.mood] || ''}</span>}
                     </div>
-                    <p className="text-sm text-slate-700 leading-relaxed line-clamp-3">{post.content}</p>
+                    <p className="text-sm text-slate-700 leading-relaxed line-clamp-3">{post.body}</p>
                     <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
                       <span className="flex items-center gap-1"><MessageSquare size={12} /> {post.likes_count || 0} تفاعل</span>
                     </div>

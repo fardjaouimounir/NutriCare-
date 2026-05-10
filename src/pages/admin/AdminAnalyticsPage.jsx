@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TrendingUp, TrendingDown, Users, Activity, Clock,
   Calendar, BarChart2, Globe, Award, Target, Download,
@@ -10,6 +10,7 @@ import {
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
+import { supabase } from '../../lib/supabase';
 
 // ─── Data ────────────────────────────────────────────────────────────────
 const monthlyGrowth = [
@@ -92,11 +93,15 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-function MetricCard({ label, value, change, up, sub, color = 'text-rose-500', bg = 'bg-rose-50' }) {
+function MetricCard({ label, value, change, up, sub, color = 'text-rose-500', bg = 'bg-rose-50', loading = false }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:-translate-y-0.5 transition-all">
+    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:-translate-y-0.5 transition-all min-h-[140px] flex flex-col justify-center">
       <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">{label}</p>
-      <p className="text-3xl font-bold text-slate-800 mb-1">{value}</p>
+      {loading ? (
+        <div className="h-9 w-24 bg-slate-100 animate-pulse rounded-lg mb-1"></div>
+      ) : (
+        <p className="text-3xl font-bold text-slate-800 mb-1">{value}</p>
+      )}
       {change && (
         <div className={`flex items-center gap-1 text-xs font-semibold ${up ? 'text-emerald-600' : 'text-red-500'}`}>
           {up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
@@ -119,6 +124,57 @@ function SectionHeader({ title, subtitle }) {
 
 export default function AdminAnalyticsPage() {
   const [period, setPeriod] = useState('هذا الشهر');
+  const [stats, setStats] = useState({
+    totalPatients: 0,
+    newThisMonth: 0,
+    totalArticles: 0,
+    totalPosts: 0,
+    loading: true
+  });
+
+  const fetchLiveStats = async () => {
+    try {
+      // 1. Total Patients
+      const { count: patientCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'patient');
+
+      // 2. New this month
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const { count: newCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'patient')
+        .gte('created_at', thirtyDaysAgo.toISOString());
+
+      // 3. Articles
+      const { count: articleCount } = await supabase
+        .from('articles')
+        .select('*', { count: 'exact', head: true });
+
+      // 4. Community Posts
+      const { count: postCount } = await supabase
+        .from('community_posts')
+        .select('*', { count: 'exact', head: true });
+
+      setStats({
+        totalPatients: patientCount || 0,
+        newThisMonth: newCount || 0,
+        totalArticles: articleCount || 0,
+        totalPosts: postCount || 0,
+        loading: false
+      });
+    } catch (err) {
+      console.error('Error fetching analytics:', err);
+      setStats(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  useEffect(() => {
+    fetchLiveStats();
+  }, []);
 
   return (
     <div className="space-y-6 pb-8">
@@ -148,10 +204,32 @@ export default function AdminAnalyticsPage() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard label="متوسط جلسة الاستخدام" value="11.4 د" change="↑ 1.8 دقيقة" up={true} sub="مقارنة بالشهر الماضي" />
-        <MetricCard label="معدل الاحتفاظ (4 أسابيع)" value="69%" change="↑ 3.2%" up={true} sub="من أصل 542 مريضة" />
-        <MetricCard label="معدل التسجيل اليومي" value="4.8" change="↑ 0.6" up={true} sub="مستخدمة جديدة/يوم" />
-        <MetricCard label="معدل التراجع (Churn)" value="2.1%" change="↓ 0.4%" up={true} sub="تحسن واضح هذا الشهر" />
+        <MetricCard 
+          label="إجمالي المريضات" 
+          value={stats.totalPatients} 
+          loading={stats.loading}
+          sub="مستخدمة مسجلة حالياً" 
+        />
+        <MetricCard 
+          label="تسجيلات جديدة" 
+          value={stats.newThisMonth} 
+          loading={stats.loading}
+          change={`↑ ${stats.newThisMonth}`} 
+          up={true} 
+          sub="خلال آخر 30 يوم" 
+        />
+        <MetricCard 
+          label="إجمالي المقالات" 
+          value={stats.totalArticles} 
+          loading={stats.loading}
+          sub="مقال توعوي منشور" 
+        />
+        <MetricCard 
+          label="تفاعل المجتمع" 
+          value={stats.totalPosts} 
+          loading={stats.loading}
+          sub="منشور في منتدى الدعم" 
+        />
       </div>
 
       {/* Growth & Daily Active */}

@@ -28,12 +28,9 @@ export default function AdminUsersPage() {
   const [editingPatient, setEditingPatient] = useState(null);
   const [error, setError] = useState('');
 
-  const [debugInfo, setDebugInfo] = useState('');
-
   const fetchAll = async () => {
     try {
       setLoading(true);
-      setDebugInfo('Step 1: Fetching profiles via RPC...');
 
       const [pRes, sRes] = await Promise.all([
         supabase.rpc('admin_get_users', { user_role: 'patient' }),
@@ -45,11 +42,9 @@ export default function AdminUsersPage() {
 
       setPatients(pRes.data || []);
       setSpecialists(sRes.data || []);
-      setDebugInfo(`DONE! Pat: ${pRes.data?.length} | Spec: ${sRes.data?.length}`);
     } catch (err) {
       console.error('Fetch crashed:', err);
-      setError('انهيار مفاجئ: ' + err.message);
-      setDebugInfo('CRASH: ' + err.message);
+      setError('تعذر تحميل البيانات: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -227,10 +222,6 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* Debug Info */}
-      <div className="bg-slate-800 text-green-400 p-3 rounded-lg font-mono text-xs text-left" dir="ltr">
-        DEBUG INFO: {debugInfo}
-      </div>
 
       {/* Tabs */}
       <div className="flex gap-2 bg-slate-100 p-1 rounded-xl w-fit">

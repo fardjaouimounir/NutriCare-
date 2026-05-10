@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard, Users, FileText, Settings, LogOut,
   Menu, X, Shield, Bell, ChevronDown, Search,
@@ -41,6 +42,13 @@ const navGroups = [
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut, profile, user } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login', { replace: true });
+  };
 
   const isActive = (item) => item.exact
     ? location.pathname === item.to
@@ -114,13 +122,13 @@ export default function AdminLayout() {
 
         {/* Bottom */}
         <div className="p-3 border-t border-slate-100">
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all"
           >
             <LogOut size={18} className="text-slate-400" />
-            الخروج من الإدارة
-          </Link>
+            تسجيل الخروج
+          </button>
         </div>
       </aside>
 
@@ -155,11 +163,11 @@ export default function AdminLayout() {
             {/* Admin Profile */}
             <button className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 transition">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-400 to-pink-600 text-white flex items-center justify-center font-bold text-xs">
-                م
+                {profile?.full_name?.charAt(0) || 'م'}
               </div>
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-slate-800 leading-tight">المشرف</p>
-                <p className="text-xs text-slate-400">admin@nutricare.dz</p>
+                <p className="text-sm font-semibold text-slate-800 leading-tight">{profile?.full_name || 'المشرف'}</p>
+                <p className="text-xs text-slate-400">{user?.email || ''}</p>
               </div>
               <ChevronDown size={15} className="text-slate-400" />
             </button>

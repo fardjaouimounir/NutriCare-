@@ -50,9 +50,14 @@ function PrivateRoute({ children }) {
 // Admin route — requires admin role
 function AdminRoute({ children }) {
   const { user, profile, loading } = useAuth();
+  // Show loader while auth state or profile is being resolved
   if (loading) return <PageLoader />;
+  // Not logged in → go to login
   if (!user) return <Navigate to="/login" replace />;
-  if (profile && profile.role !== 'admin') return <Navigate to="/dashboard" replace />;
+  // Logged in but profile not fetched yet → wait
+  if (!profile) return <PageLoader />;
+  // Logged in but not admin → redirect to patient dashboard
+  if (profile.role !== 'admin') return <Navigate to="/dashboard" replace />;
   return children;
 }
 
@@ -61,8 +66,10 @@ function GuestRoute({ children }) {
   const { user, profile, loading } = useAuth();
   if (loading) return <PageLoader />;
   if (!user) return children;
+  // Wait for profile to load before redirecting
+  if (!profile) return <PageLoader />;
   // Redirect based on role
-  if (profile?.role === 'admin') return <Navigate to="/admin" replace />;
+  if (profile.role === 'admin') return <Navigate to="/admin" replace />;
   return <Navigate to="/dashboard" replace />;
 }
 

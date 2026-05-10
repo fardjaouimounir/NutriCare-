@@ -42,8 +42,22 @@ export function AuthProvider({ children }) {
     const timeout = setTimeout(resolve, 6000);
 
     // Primary: listen to auth state changes
+    // IMPORTANT: We guard against INITIAL_SESSION events from the isolated
+    // supabaseSignup client (persistSession:false) from overwriting the admin
+    // session. Supabase JS can fire cross-client auth events on the same
+    // onAuthStateChange bus. We track the current user and ignore any
+    // INITIAL_SESSION that tries to clear a session we already have.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // Ignore spurious INITIAL_SESSION with no session when we already
+        // have an active authenticated user — this is the "admin creates user"
+        // bleed-through bug from the isolated signup client.
+        if (event === 'INITIAL_SESSION' && !session) {
+          clearTimeout(timeout);
+          resolve();
+          return;
+        }
+
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchProfile(session.user.id);
