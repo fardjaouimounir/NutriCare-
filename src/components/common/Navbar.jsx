@@ -11,6 +11,7 @@ export const Navbar = ({ onMenuClick, hideLinks = false }) => {
   const toggleLang = () => {
     const nextLang = i18n.language === 'ar' ? 'fr' : 'ar';
     i18n.changeLanguage(nextLang);
+    localStorage.setItem('nutricare-lang', nextLang);
     document.documentElement.dir = nextLang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = nextLang;
   };

@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Layouts
@@ -121,10 +122,34 @@ function AppRoutes() {
   );
 }
 
+
+// Syncs HTML dir and lang attributes with i18next
+function LanguageManager() {
+  const { i18n } = useTranslation();
+  
+  React.useEffect(() => {
+    const handleLangChange = (lng) => {
+      document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lng;
+    };
+    
+    i18n.on('languageChanged', handleLangChange);
+    // Initial sync
+    handleLangChange(i18n.language);
+    
+    return () => {
+      i18n.off('languageChanged', handleLangChange);
+    };
+  }, [i18n]);
+  
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <LanguageManager />
         <AppRoutes />
       </AuthProvider>
     </BrowserRouter>

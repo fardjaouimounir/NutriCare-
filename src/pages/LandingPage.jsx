@@ -12,43 +12,46 @@ export default function LandingPage() {
   const { t } = useTranslation();
 
   const features = [
-    { icon: Apple, title: t('nutrition_personal'), desc: 'Crafted specifically for your treatment phase.' },
-    { icon: ChefHat, title: t('algerian_recipes'), desc: 'Local dishes adapted for your health needs.' },
-    { icon: BookHeart, title: t('emotional_journal'), desc: 'Track your mood, symptoms, and feelings.' },
-    { icon: Users, title: 'المجتمع', desc: 'Connect with a supportive community of women.' },
-    { icon: Bell, title: 'التذكيرات', desc: 'Never miss a meal, pill, or hydration goal.' },
-    { icon: HeartPulse, title: 'النصائح', desc: 'Medically-validated advice and articles.' },
+    { icon: Apple, title: t('nutrition_personal'), desc: i18n.language === 'ar' ? 'مصممة خصيصاً لمرحلة علاجك.' : 'Conçue spécifiquement pour votre phase de traitement.' },
+    { icon: ChefHat, title: t('algerian_recipes'), desc: i18n.language === 'ar' ? 'أطباق محلية مكيفة حسب احتياجاتك الصحية.' : 'Plats locaux adaptés à vos besoins de santé.' },
+    { icon: BookHeart, title: t('emotional_journal'), desc: i18n.language === 'ar' ? 'تتبع حالتك المزاجية وأعراضك ومشاعرك.' : 'Suivez votre humeur, vos symptômes et vos sentiments.' },
+    { icon: Users, title: t('community'), desc: i18n.language === 'ar' ? 'تواصل مع مجتمع داعم من النساء.' : 'Connectez-vous avec une communauté de soutien.' },
+    { icon: Bell, title: t('reminders'), desc: i18n.language === 'ar' ? 'لا تفوت وجبة أو دواء أو هدف ترطيب.' : 'Ne ratez jamais un repas, un médicament ou un objectif.' },
+    { icon: HeartPulse, title: t('advice'), desc: i18n.language === 'ar' ? 'نصائح ومقالات معتمدة طبياً.' : 'Conseils et articles validés médicalement.' },
   ];
 
+  const isRtl = i18n.language === 'ar';
+
   return (
-    <div className="w-full bg-neutral overflow-x-hidden">
+    <div className={`w-full bg-neutral overflow-x-hidden ${isRtl ? 'text-right' : 'text-left'}`}>
       {/* Hero Section */}
       <section className="relative w-full min-h-[90vh] flex items-center py-20">
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: isRtl ? 30 : -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="max-w-2xl"
             >
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/5 text-primary font-bold text-xs uppercase tracking-widest mb-8 border border-primary/10">
                 <CheckCircle size={14} />
-                <span>مرافقتك في رحلة التعافي</span>
+                <span>{t('hero_badge')}</span>
               </div>
 
               <h1 className="text-5xl md:text-7xl font-display font-bold text-dark mb-8 leading-[1.1]">
-                تغذيـتـك، <br />
-                <span className="italic text-primary">قــــوّتــــك</span>
+                {i18n.language === 'ar' ? (
+                  <>تغذيـتـك، <br /><span className="italic text-primary">قــــوّتــــك</span></>
+                ) : (
+                  <>Nutrition, <br /><span className="italic text-primary">Votre Force</span></>
+                )}
               </h1>
 
               <p className="text-lg md:text-xl text-text-muted mb-12 max-w-xl leading-relaxed font-medium">
-                {document.documentElement.lang === 'ar'
-                  ? 'أول منصة جزائرية متكاملة تدمج بين التغذية العلاجية، الدعم النفسي، والمعرفة الطبية لدعمك في كل خطوة من رحلة علاج سرطان الثدي.'
-                  : <span className="force-ltr block">The first comprehensive Algerian platform integrating clinical nutrition, psychological support, and medical knowledge.</span>}
+                {t('hero_desc')}
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className={`flex flex-col sm:flex-row items-center gap-6 ${isRtl ? 'sm:justify-start' : ''}`}>
                 <Link to="/signup">
                   <Button variant="primary" className="text-lg px-10 py-4 shadow-xl shadow-primary/20">
                     {t('start_journey')}
@@ -73,18 +76,18 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-dark/20 to-transparent" />
               </div>
 
-              <div className="absolute -bottom-8 -left-8 glass p-5 rounded-xl shadow-xl border-white z-20 max-w-[220px]">
+              <div className={`absolute -bottom-8 ${isRtl ? '-right-8' : '-left-8'} glass p-5 rounded-xl shadow-xl border-white z-20 max-w-[220px]`}>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center">
                     <Apple size={16} />
                   </div>
-                  <div className="font-bold text-dark text-sm">خطة اليوم</div>
+                  <div className="font-bold text-dark text-sm">{i18n.language === 'ar' ? 'خطة اليوم' : "Plan d'aujourd'hui"}</div>
                 </div>
                 <div className="space-y-1.5">
                   <div className="h-1 w-full bg-dark/5 rounded-full overflow-hidden">
                     <div className="h-full w-3/4 bg-primary" />
                   </div>
-                  <div className="text-[10px] font-bold text-text-muted">75% مكتمل</div>
+                  <div className="text-[10px] font-bold text-text-muted">{i18n.language === 'ar' ? '75% مكتمل' : '75% complété'}</div>
                 </div>
               </div>
             </motion.div>
@@ -97,10 +100,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 text-center">
             {[
-              { val: '500+', label: 'مريضة مستفيدة' },
-              { val: '200+', label: 'وصفة مقننة' },
-              { val: '50+', label: 'خبير وأخصائي' },
-              { val: '98%', label: 'نسبة الالتزام' }
+              { val: '500+', label: t('stat_patients') },
+              { val: '200+', label: t('stat_recipes') },
+              { val: '50+', label: t('stat_experts') },
+              { val: '98%', label: t('stat_commitment') }
             ].map((s, i) => (
               <div key={i} className="space-y-1">
                 <div className="text-4xl font-display font-bold text-dark">{s.val}</div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard, Users, FileText, Settings, LogOut,
@@ -7,43 +8,44 @@ import {
   BarChart2, UserCheck, MessageSquare, Download
 } from 'lucide-react';
 
-const navGroups = [
-  {
-    label: 'الرئيسية',
-    items: [
-      { to: '/admin', icon: LayoutDashboard, label: 'لوحة التحكم', exact: true },
-      { to: '/admin/analytics', icon: BarChart2, label: 'التحليلات' },
-    ],
-  },
-  {
-    label: 'إدارة المستخدمين',
-    items: [
-      { to: '/admin/users', icon: Users, label: 'المريضات' },
-      { to: '/admin/specialists', icon: UserCheck, label: 'الأخصائيات' },
-    ],
-  },
-  {
-    label: 'المحتوى',
-    items: [
-      { to: '/admin/content', icon: FileText, label: 'المحتوى' },
-      { to: '/admin/community', icon: MessageSquare, label: 'المجتمع' },
-      { to: '/admin/notifications', icon: Bell, label: 'الإشعارات' },
-    ],
-  },
-  {
-    label: 'النظام',
-    items: [
-      { to: '/admin/reports', icon: Download, label: 'التقارير' },
-      { to: '/admin/settings', icon: Settings, label: 'الإعدادات' },
-    ],
-  },
-];
-
 export default function AdminLayout() {
+  const { t, i18n } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, profile, user } = useAuth();
+
+  const navGroups = [
+    {
+      label: i18n.language === 'ar' ? 'الرئيسية' : 'PRINCIPAL',
+      items: [
+        { to: '/admin', icon: LayoutDashboard, label: t('admin_dashboard'), exact: true },
+        { to: '/admin/analytics', icon: BarChart2, label: t('admin_analytics') },
+      ],
+    },
+    {
+      label: i18n.language === 'ar' ? 'إدارة المستخدمين' : 'UTILISATEURS',
+      items: [
+        { to: '/admin/users', icon: Users, label: t('admin_users') },
+        { to: '/admin/specialists', icon: UserCheck, label: t('admin_specialists') },
+      ],
+    },
+    {
+      label: i18n.language === 'ar' ? 'المحتوى' : 'CONTENU',
+      items: [
+        { to: '/admin/content', icon: FileText, label: t('admin_content') },
+        { to: '/admin/community', icon: MessageSquare, label: t('nav_community') },
+        { to: '/admin/notifications', icon: Bell, label: t('admin_notifications') },
+      ],
+    },
+    {
+      label: i18n.language === 'ar' ? 'النظام' : 'SYSTÈME',
+      items: [
+        { to: '/admin/reports', icon: Download, label: t('admin_reports') },
+        { to: '/admin/settings', icon: Settings, label: t('admin_settings') },
+      ],
+    },
+  ];
 
   const handleLogout = async () => {
     await signOut();
@@ -54,8 +56,10 @@ export default function AdminLayout() {
     ? location.pathname === item.to
     : location.pathname.startsWith(item.to);
 
+  const isRtl = i18n.language === 'ar';
+
   return (
-    <div className="min-h-screen flex bg-slate-50 font-sans" dir="rtl">
+    <div className={`min-h-screen flex bg-slate-50 font-sans ${isRtl ? 'text-right' : 'text-left'}`}>
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
@@ -67,9 +71,9 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 right-0 z-50 w-64 bg-white border-l border-slate-100 shadow-xl
+          fixed inset-y-0 ${isRtl ? 'right-0 border-l' : 'left-0 border-r'} z-50 w-64 bg-white border-slate-100 shadow-xl
           flex flex-col transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}
+          ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}
           lg:translate-x-0 lg:static lg:shadow-none lg:shrink-0
         `}
       >
@@ -80,7 +84,7 @@ export default function AdminLayout() {
               <Shield size={19} />
             </div>
             <div>
-              <p className="font-bold text-slate-800 text-sm leading-tight">لوحة الإدارة</p>
+              <p className="font-bold text-slate-800 text-sm leading-tight">{i18n.language === 'ar' ? 'لوحة الإدارة' : 'Admin Panel'}</p>
               <p className="text-xs text-slate-400">NutriCare Admin</p>
             </div>
           </div>
@@ -93,7 +97,7 @@ export default function AdminLayout() {
         <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-5">
           {navGroups.map(group => (
             <div key={group.label}>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">{group.label}</p>
+              <p className={`text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mb-2 ${isRtl ? 'text-right' : 'text-left'}`}>{group.label}</p>
               <div className="space-y-0.5">
                 {group.items.map(item => {
                   const active = isActive(item);
@@ -127,7 +131,7 @@ export default function AdminLayout() {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all"
           >
             <LogOut size={18} className="text-slate-400" />
-            تسجيل الخروج
+            {t('admin_logout')}
           </button>
         </div>
       </aside>
@@ -145,15 +149,15 @@ export default function AdminLayout() {
 
           {/* Search */}
           <div className="relative flex-1 max-w-sm hidden sm:block">
-            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-slate-400`} />
             <input
               type="text"
-              placeholder="بحث سريع..."
-              className="w-full pr-9 pl-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl placeholder-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400 transition"
+              placeholder={t('admin_search')}
+              className={`w-full ${isRtl ? 'pr-9 pl-4 text-right' : 'pl-9 pr-4 text-left'} py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl placeholder-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-300 focus:border-rose-400 transition`}
             />
           </div>
 
-          <div className="flex items-center gap-2 mr-auto">
+          <div className={`flex items-center gap-2 ${isRtl ? 'mr-auto' : 'ml-auto'}`}>
             {/* Notifications */}
             <button className="relative p-2.5 rounded-xl hover:bg-slate-100 text-slate-500 transition">
               <Bell size={19} />
@@ -163,10 +167,10 @@ export default function AdminLayout() {
             {/* Admin Profile */}
             <button className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 transition">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-400 to-pink-600 text-white flex items-center justify-center font-bold text-xs">
-                {profile?.full_name?.charAt(0) || 'م'}
+                {profile?.full_name?.charAt(0) || (isRtl ? 'م' : 'A')}
               </div>
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-slate-800 leading-tight">{profile?.full_name || 'المشرف'}</p>
+              <div className={`${isRtl ? 'text-right' : 'text-left'} hidden sm:block`}>
+                <p className="text-sm font-semibold text-slate-800 leading-tight">{profile?.full_name || (isRtl ? 'المشرف' : 'Admin')}</p>
                 <p className="text-xs text-slate-400">{user?.email || ''}</p>
               </div>
               <ChevronDown size={15} className="text-slate-400" />
@@ -182,3 +186,4 @@ export default function AdminLayout() {
     </div>
   );
 }
+
