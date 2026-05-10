@@ -71,7 +71,32 @@ const resources = {
       "admin_reports": "التقارير",
       "admin_logout": "تسجيل الخروج",
       "admin_search": "بحث سريع...",
-      "admin_notifications": "الإشعارات"
+      "admin_notifications": "الإشعارات",
+      // Auth translations
+      "auth_welcome_back": "مرحباً بعودتك",
+      "auth_login_desc": "أدخلي بياناتك للوصول إلى حسابك",
+      "auth_create_account": "إنشاء حساب جديد",
+      "auth_signup_desc": "خبراء التغذية والصحة بانتظارك",
+      "auth_email": "البريد الإلكتروني",
+      "auth_password": "كلمة المرور",
+      "auth_login_btn": "تسجيل الدخول",
+      "auth_logging_in": "جاري الدخول...",
+      "auth_no_account": "ليس لديك حساب؟",
+      "auth_signup_free": "سجلي مجاناً",
+      "auth_have_account": "لديك حساب بالفعل؟",
+      "auth_login_now": "تسجيل الدخول",
+      "auth_error_invalid": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "auth_step": "الخطوة",
+      "auth_of": "من",
+      "auth_next": "متابعة",
+      "auth_prev": "رجوع",
+      "auth_finish": "إتمام التسجيل",
+      "auth_finishing": "جاري التسجيل...",
+      "auth_success_title": "أهلاً بكِ في عائلتنا",
+      "auth_success_desc": "تم إعداد حسابك بنجاح. نحن جاهزون للبدء معاً.",
+      "auth_continue_btn": "استمري إلى الواجهة",
+      "auth_sidebar_title": "نرافقكِ لتكوني أقوى",
+      "auth_sidebar_desc": "اكتشفي الوصفات الصحّية، تتبعي حالتك، وكوني جزءاً من مجتمع يدعمك دائماً."
     }
   },
   fr: {
@@ -143,7 +168,32 @@ const resources = {
       "admin_reports": "Rapports",
       "admin_logout": "Déconnexion",
       "admin_search": "Recherche rapide...",
-      "admin_notifications": "Notifications"
+      "admin_notifications": "Notifications",
+      // Auth translations
+      "auth_welcome_back": "Bon retour parmi nous",
+      "auth_login_desc": "Entrez vos coordonnées pour accéder à votre compte",
+      "auth_create_account": "Créer un nouveau compte",
+      "auth_signup_desc": "Nos experts en nutrition et santé vous attendent",
+      "auth_email": "Adresse e-mail",
+      "auth_password": "Mot de passe",
+      "auth_login_btn": "Se connecter",
+      "auth_logging_in": "Connexion en cours...",
+      "auth_no_account": "Vous n'avez pas de compte ?",
+      "auth_signup_free": "Inscrivez-vous gratuitement",
+      "auth_have_account": "Vous avez déjà un compte ?",
+      "auth_login_now": "Connectez-vous",
+      "auth_error_invalid": "E-mail ou mot de passe incorrect.",
+      "auth_step": "Étape",
+      "auth_of": "sur",
+      "auth_next": "Suivant",
+      "auth_prev": "Retour",
+      "auth_finish": "Finaliser l'inscription",
+      "auth_finishing": "Inscription en cours...",
+      "auth_success_title": "Bienvenue dans notre famille",
+      "auth_success_desc": "Votre compte a été créé avec succès. Nous sommes prêts à commencer ensemble.",
+      "auth_continue_btn": "Continuer vers l'interface",
+      "auth_sidebar_title": "Nous vous accompagnons pour être plus forte",
+      "auth_sidebar_desc": "Découvrez des recettes saines, suivez votre état et faites partie d'une communauté qui vous soutient."
     }
   }
 };
