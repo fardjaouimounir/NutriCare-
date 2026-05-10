@@ -9,7 +9,7 @@ import { Apple, BookHeart, Users, Bell, HeartPulse, ChefHat, CheckCircle } from 
 import mainHeroImg from '../assets/img.png';
 
 export default function LandingPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const features = [
     { icon: Apple, title: t('nutrition_personal'), desc: t('nutrition_personal_desc') },
