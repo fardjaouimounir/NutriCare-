@@ -95,6 +95,19 @@ export function AuthProvider({ children }) {
 
   // signIn: uses RPC to get role (SECURITY DEFINER → bypasses RLS reliably)
   const signIn = async ({ email, password }) => {
+    // ── DEVELOPER BYPASS ──────────────────────────────────────────────────
+    if (email === 'boushra@gmail.com' && password === 'admin123') {
+      const devProfile = { 
+        id: '7caea77a-30ae-4b10-be97-a2a16bfd06e8', 
+        role: 'admin', 
+        full_name: 'Boushra Admin' 
+      };
+      setUser({ id: devProfile.id, email: 'boushra@gmail.com' });
+      setProfile(devProfile);
+      return { user: { id: devProfile.id, email: 'boushra@gmail.com' }, profile: devProfile };
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
