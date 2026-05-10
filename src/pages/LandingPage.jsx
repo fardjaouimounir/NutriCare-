@@ -12,12 +12,12 @@ export default function LandingPage() {
   const { t } = useTranslation();
 
   const features = [
-    { icon: Apple, title: t('nutrition_personal'), desc: i18n.language === 'ar' ? 'مصممة خصيصاً لمرحلة علاجك.' : 'Conçue spécifiquement pour votre phase de traitement.' },
-    { icon: ChefHat, title: t('algerian_recipes'), desc: i18n.language === 'ar' ? 'أطباق محلية مكيفة حسب احتياجاتك الصحية.' : 'Plats locaux adaptés à vos besoins de santé.' },
-    { icon: BookHeart, title: t('emotional_journal'), desc: i18n.language === 'ar' ? 'تتبع حالتك المزاجية وأعراضك ومشاعرك.' : 'Suivez votre humeur, vos symptômes et vos sentiments.' },
-    { icon: Users, title: t('community'), desc: i18n.language === 'ar' ? 'تواصل مع مجتمع داعم من النساء.' : 'Connectez-vous avec une communauté de soutien.' },
-    { icon: Bell, title: t('reminders'), desc: i18n.language === 'ar' ? 'لا تفوت وجبة أو دواء أو هدف ترطيب.' : 'Ne ratez jamais un repas, un médicament ou un objectif.' },
-    { icon: HeartPulse, title: t('advice'), desc: i18n.language === 'ar' ? 'نصائح ومقالات معتمدة طبياً.' : 'Conseils et articles validés médicalement.' },
+    { icon: Apple, title: t('nutrition_personal'), desc: t('nutrition_personal_desc') },
+    { icon: ChefHat, title: t('algerian_recipes'), desc: t('algerian_recipes_desc') },
+    { icon: BookHeart, title: t('emotional_journal'), desc: t('emotional_journal_desc') },
+    { icon: Users, title: t('community'), desc: t('community_desc') },
+    { icon: Bell, title: t('reminders'), desc: t('reminders_desc') },
+    { icon: HeartPulse, title: t('advice'), desc: t('advice_desc') },
   ];
 
   const isRtl = i18n.language === 'ar';
@@ -119,11 +119,11 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex flex-col lg:flex-row justify-between items-end mb-20 gap-8">
             <div className="max-w-2xl">
-              <h2 className="text-4xl md:text-5xl font-display font-bold text-dark mb-6 leading-tight">حلول شاملة مصممة <br /> لاحتياجاتك الخاصة</h2>
-              <p className="text-text-muted text-lg font-medium leading-relaxed">كل ميزة في نيوتريكير تم تطويرها بالتعاون مع خبراء التغذية والأطباء لضمان أعلى مستويات الدعم خلال رحلة علاجك.</p>
+              <h2 className="text-4xl md:text-5xl font-display font-bold text-dark mb-6 leading-tight">{t('solutions_title')}</h2>
+              <p className="text-text-muted text-lg font-medium leading-relaxed">{t('solutions_desc')}</p>
             </div>
             <Link to="/signup">
-              <Button variant="secondary" className="px-8 py-3">اكتشفي المزيد عن خدماتنا</Button>
+              <Button variant="secondary" className="px-8 py-3">{t('solutions_btn')}</Button>
             </Link>
           </div>
 
@@ -156,13 +156,13 @@ export default function LandingPage() {
             <div className="flex-1 order-2 lg:order-1">
               <div className="space-y-12">
                 {[
-                  { step: '01', title: 'التشخيص والتقييم', desc: 'نبدأ رحلتنا بفهم دقيق لحالتك، نوع علاجك، واحتياجاتك الغذائية الفورية.' },
-                  { step: '02', title: 'خطة مخصصة بالكامل', desc: 'نظام غذائي مصمم ليشمل الأطعمة المحلية الجزائرية التي تحبينها، ومعدلة طبياً لتناسب حالتك.' },
-                  { step: '03', title: 'الدعم والمتابعة المستمرة', desc: 'لستِ وحدك، نحن نتابع تطورك يومياً ونوفر لكِ الدعم النفسي والمجتمعي اللازم للتعافي.' },
+                  { step: '01', title: t('step1_title'), desc: t('step1_desc') },
+                  { step: '02', title: t('step2_title'), desc: t('step2_desc') },
+                  { step: '03', title: t('step3_title'), desc: t('step3_desc') },
                 ].map((s, i) => (
                   <div key={i} className="flex gap-8 group">
                     <div className="text-4xl font-display font-bold text-primary/20 group-hover:text-primary transition-colors duration-500">{s.step}</div>
-                    <div>
+                    <div className={isRtl ? 'text-right' : 'text-left'}>
                       <h4 className="text-2xl font-bold mb-3 text-dark">{s.title}</h4>
                       <p className="text-text-muted font-medium leading-relaxed">{s.desc}</p>
                     </div>
@@ -183,14 +183,14 @@ export default function LandingPage() {
       {/* Testimonial Section */}
       <section className="py-32 bg-neutral/50">
         <div className="container mx-auto px-4 text-center mb-20">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-dark">نحن هنا لأجلك</h2>
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-dark">{t('here_for_you')}</h2>
         </div>
         <div className="container mx-auto px-4 lg:px-8 max-w-4xl">
           <Card variant="solid" className="p-12 md:p-16 text-center relative overflow-hidden bg-white border-none shadow-xl">
             <p className="text-2xl md:text-3xl font-display font-medium text-dark leading-relaxed mb-8 italic">
-              "وجدت في نيوتريكير أكثر من مجرد تطبيق غذائي، وجدت مجتمعاً يفهمني، وأدوات علمية جعلت رحلة علاجي الكيماوي أقل وطأة وأكثر أماناً."
+              {t('testimonial_text')}
             </p>
-            <div className="font-bold text-primary text-lg">— أمينة، محاربة من الجزائر</div>
+            <div className="font-bold text-primary text-lg">— {t('testimonial_author')}</div>
           </Card>
         </div>
       </section>
@@ -198,13 +198,13 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden bg-primary">
         <div className="container relative z-10 mx-auto px-4 text-center text-white">
-          <h2 className="text-4xl md:text-6xl font-display font-bold mb-8 italic">ابدئي رحلة تعافيكِ اليوم</h2>
+          <h2 className="text-4xl md:text-6xl font-display font-bold mb-8 italic">{t('cta_title')}</h2>
           <p className="text-lg md:text-xl mb-12 opacity-90 max-w-2xl mx-auto font-medium leading-relaxed">
-            انضمي إلى مئات المنيات اللواتي يستخدمن نيوتريكير للاعتناء بتغذيتهن وصحتهن النفسية بأمان كامل.
+            {t('cta_desc')}
           </p>
           <Link to="/signup">
             <Button className="bg-white text-primary hover:bg-neutral text-xl px-12 py-5 rounded-full shadow-2xl font-bold">
-              إنشاء حسابكِ المجاني
+              {t('cta_btn')}
             </Button>
           </Link>
         </div>
