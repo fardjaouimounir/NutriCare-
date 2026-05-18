@@ -17,6 +17,8 @@ import {
   Heart
 } from 'lucide-react';
 
+import logoImg from '../../assets/logo.png';
+
 export const Sidebar = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
 
@@ -36,11 +38,9 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const sidebarContent = (
     <div className="w-64 h-full glass-card p-4 flex flex-col gap-2 overflow-y-auto no-scrollbar">
       <div className="flex items-center justify-between lg:hidden mb-6 px-2">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm ring-4 ring-primary/5">
-            <Heart size={14} fill="currentColor" />
-          </div>
-          <span className="text-lg font-display font-bold text-dark tracking-tighter uppercase">NutriCare</span>
+        <div className="flex items-center gap-0.5">
+          <img src={logoImg} className="h-16 w-auto object-contain" alt="SENOCARE" />
+          <span className="text-lg font-display font-bold text-dark tracking-tighter uppercase">SENOCARE</span>
         </div>
         <button onClick={onClose} className="p-1 text-text-muted hover:text-primary">
           <X size={24} />

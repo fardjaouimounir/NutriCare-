@@ -186,7 +186,7 @@ export default function AuthPage({ type = 'login' }) {
     <div className={`flex min-h-[calc(100vh-80px)] w-full ${isRtl ? 'text-right' : 'text-left'}`}>
       {/* Visual Side */}
       <div className="hidden lg:flex w-1/2 bg-secondary relative items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center mix-blend-multiply opacity-20 filter grayscale" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1594824436002-0545331f4961?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center mix-blend-multiply opacity-20 filter grayscale" />
         <div className="relative z-10 p-12 max-w-xl text-center">
           <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-sm border border-primary/5">
             <Heart size={40} className="text-primary" fill="currentColor" />

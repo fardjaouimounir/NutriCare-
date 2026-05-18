@@ -58,8 +58,8 @@ export default function AdminSettingsPage() {
     twoFactor: false,
   });
 
-  const [platformName, setPlatformName] = useState('NutriCare');
-  const [supportEmail, setSupportEmail] = useState('support@nutricare.dz');
+  const [platformName, setPlatformName] = useState('SENOCARE');
+  const [supportEmail, setSupportEmail] = useState('support@senocare.dz');
   const [saved, setSaved] = useState(false);
 
   const toggle = key => setSettings(prev => ({ ...prev, [key]: !prev[key] }));

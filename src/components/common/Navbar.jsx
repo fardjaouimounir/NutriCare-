@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Heart, Menu, Globe } from 'lucide-react';
+import { Menu, Globe } from 'lucide-react';
 import { Button } from '../ui/Button';
+import logoImg from '../../assets/logo.png';
 
 export const Navbar = ({ onMenuClick, hideLinks = false }) => {
   const { t, i18n } = useTranslation();
@@ -32,11 +33,9 @@ export const Navbar = ({ onMenuClick, hideLinks = false }) => {
               <Menu size={20} />
             </button>
           )}
-          <Link to="/" className="flex items-center gap-2 group outline-none focus:ring-2 focus:ring-dark/10 rounded-lg p-1">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm ring-4 ring-primary/5">
-              <Heart size={14} fill="currentColor" />
-            </div>
-            <span className="text-lg font-display font-bold text-dark tracking-tighter">NUTRICARE</span>
+          <Link to="/" className="flex items-center gap-0.5 group outline-none focus:ring-2 focus:ring-dark/10 rounded-lg p-1">
+            <img src={logoImg} className="h-16 w-auto object-contain" alt="SENOCARE" />
+            <span className="text-lg font-display font-bold text-dark tracking-tighter">SENOCARE</span>
           </Link>
         </div>
 

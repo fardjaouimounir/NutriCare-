@@ -10,7 +10,7 @@ export const Footer = ({ minimal = false }) => {
   if (minimal) {
     return (
       <footer className="py-6 text-center text-sm text-text-muted font-ui">
-        <p>&copy; {new Date().getFullYear()} NUTRICARE. {t('footer_rights')}</p>
+        <p>&copy; {new Date().getFullYear()} SENOCARE. {t('footer_rights')}</p>
       </footer>
     );
   }
@@ -25,7 +25,7 @@ export const Footer = ({ minimal = false }) => {
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
                 <Heart size={16} fill="currentColor" />
               </div>
-              <span className="text-xl font-display font-bold text-primary">NUTRICARE</span>
+              <span className="text-xl font-display font-bold text-primary">SENOCARE</span>
             </Link>
             <p className="text-text-muted text-sm leading-relaxed">
               {t('footer_desc')}
@@ -86,7 +86,7 @@ export const Footer = ({ minimal = false }) => {
         </div>
 
         <div className="pt-8 border-t border-white/20 text-center text-sm text-text-muted">
-          <p>&copy; {new Date().getFullYear()} NUTRICARE. {t('footer_rights')}</p>
+          <p>&copy; {new Date().getFullYear()} SENOCARE. {t('footer_rights')}</p>
         </div>
       </div>
     </footer>

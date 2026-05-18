@@ -85,7 +85,7 @@ export default function AdminLayout() {
             </div>
             <div>
               <p className="font-bold text-slate-800 text-sm leading-tight">{i18n.language === 'ar' ? 'لوحة الإدارة' : 'Admin Panel'}</p>
-              <p className="text-xs text-slate-400">NutriCare Admin</p>
+              <p className="text-xs text-slate-400">SENOCARE Admin</p>
             </div>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition">

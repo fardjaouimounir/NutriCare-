@@ -96,15 +96,26 @@ export function AuthProvider({ children }) {
   // signIn: uses RPC to get role (SECURITY DEFINER → bypasses RLS reliably)
   const signIn = async ({ email, password }) => {
     // ── DEVELOPER BYPASS ──────────────────────────────────────────────────
-    if (email === 'boushra@gmail.com' && password === 'admin123') {
-      const devProfile = { 
-        id: '7caea77a-30ae-4b10-be97-a2a16bfd06e8', 
-        role: 'admin', 
-        full_name: 'Boushra Admin' 
-      };
-      setUser({ id: devProfile.id, email: 'boushra@gmail.com' });
-      setProfile(devProfile);
-      return { user: { id: devProfile.id, email: 'boushra@gmail.com' }, profile: devProfile };
+    const emailLower = email.toLowerCase();
+    const adminCredentials = {
+      'nesrineboumediene11@gmail.com': { name: 'Nesrine', password: 'nesrine_seno_2026', id: 'admin-nesrine' },
+      'bedjbedjbouthaina@gmail.com': { name: 'Bouthaina', password: 'bouthaina_seno_2026', id: 'admin-bouthaina' },
+      'seddikibouchra475@gmail.com': { name: 'Seddiki bouchra', password: 'seddiki_seno_2026', id: 'admin-seddiki' },
+      'boushra@gmail.com': { name: 'Boushra Admin', password: 'admin123', id: '7caea77a-30ae-4b10-be97-a2a16bfd06e8' }
+    };
+
+    if (adminCredentials[emailLower]) {
+      const cred = adminCredentials[emailLower];
+      if (cred.password === password) {
+        const devProfile = { 
+          id: cred.id, 
+          role: 'admin', 
+          full_name: cred.name 
+        };
+        setUser({ id: devProfile.id, email: emailLower });
+        setProfile(devProfile);
+        return { user: { id: devProfile.id, email: emailLower }, profile: devProfile };
+      }
     }
     // ──────────────────────────────────────────────────────────────────────
 

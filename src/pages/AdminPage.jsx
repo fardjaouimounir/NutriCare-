@@ -74,7 +74,7 @@ export default function AdminPage() {
     <div className={`space-y-8 ${isRtl ? 'text-right' : 'text-left'}`}>
       <div>
         <h1 className="text-2xl font-bold text-slate-800">{t('admin_dashboard')}</h1>
-        <p className="text-slate-500 text-sm mt-1">{i18n.language === 'ar' ? 'نظرة عامة على منصة NutriCare' : 'Aperçu de la plateforme NutriCare'}</p>
+        <p className="text-slate-500 text-sm mt-1">{i18n.language === 'ar' ? 'نظرة عامة على منصة SENOCARE' : 'Aperçu de la plateforme SENOCARE'}</p>
       </div>
 
       {/* Stats Grid */}

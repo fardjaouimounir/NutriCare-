@@ -8,31 +8,31 @@ import {
 const SPECIALISTS = [
   {
     id: 1, name: 'د. نورة الشامي', specialty: 'أخصائية تغذية سريرية', avatar: 'ن',
-    email: 'noura.s@nutricare.dz', phone: '+213 550 123 456',
+    email: 'noura.s@senocare.dz', phone: '+213 550 123 456',
     patients: 128, rating: 4.9, published: 24, joined: 'يناير 2026', status: 'نشطة',
     color: 'from-rose-400 to-pink-600',
   },
   {
     id: 2, name: 'د. رانيا فهمي', specialty: 'أخصائية نفسية وعلاج معرفي', avatar: 'ر',
-    email: 'rania.f@nutricare.dz', phone: '+213 661 789 012',
+    email: 'rania.f@senocare.dz', phone: '+213 661 789 012',
     patients: 94, rating: 4.7, published: 18, joined: 'فبراير 2026', status: 'نشطة',
     color: 'from-indigo-400 to-purple-600',
   },
   {
     id: 3, name: 'د. أمل رشيد', specialty: 'أخصائية أورام وعلاج داعم', avatar: 'أ',
-    email: 'amal.r@nutricare.dz', phone: '+213 770 345 678',
+    email: 'amal.r@senocare.dz', phone: '+213 770 345 678',
     patients: 156, rating: 4.8, published: 31, joined: 'ديسمبر 2025', status: 'نشطة',
     color: 'from-emerald-400 to-teal-600',
   },
   {
     id: 4, name: 'د. لينا محمود', specialty: 'معالجة طبيعية وتأهيل', avatar: 'ل',
-    email: 'lina.m@nutricare.dz', phone: '+213 560 901 234',
+    email: 'lina.m@senocare.dz', phone: '+213 560 901 234',
     patients: 72, rating: 4.6, published: 12, joined: 'مارس 2026', status: 'نشطة',
     color: 'from-amber-400 to-orange-500',
   },
   {
     id: 5, name: 'د. سلمى قاسم', specialty: 'طبيبة عامة ومتخصصة في الرعاية التلطيفية', avatar: 'س',
-    email: 'salma.q@nutricare.dz', phone: '+213 699 567 890',
+    email: 'salma.q@senocare.dz', phone: '+213 699 567 890',
     patients: 48, rating: 4.5, published: 8, joined: 'أبريل 2026', status: 'في انتظار التفعيل',
     color: 'from-cyan-400 to-blue-500',
   },

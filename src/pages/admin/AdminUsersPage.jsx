@@ -208,11 +208,11 @@ export default function AdminUsersPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">إدارة المستخدمين</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{patients.length} مريضة · {specialists.length} أخصائي</p>
+          <p className="text-slate-500 text-sm mt-0.5">{patients.length} مريضة · {specialists.length} أخصائية</p>
         </div>
         <button onClick={() => tab === 'patients' ? setShowPatientForm(true) : setShowSpecForm(true)}
           className="flex items-center gap-2 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm">
-          <Plus size={16} /> {tab === 'patients' ? 'إضافة مريضة' : 'إضافة أخصائي'}
+          <Plus size={16} /> {tab === 'patients' ? 'إضافة مريضة' : 'إضافة أخصائية'}
         </button>
       </div>
 
@@ -226,7 +226,7 @@ export default function AdminUsersPage() {
       {/* Tabs */}
       <div className="flex gap-2 bg-slate-100 p-1 rounded-xl w-fit">
         {[{ id: 'patients', label: `المريضات (${patients.length})`, icon: User },
-          { id: 'specialists', label: `الأخصائيون (${specialists.length})`, icon: UserCheck }].map(t => (
+          { id: 'specialists', label: `الأخصائيات (${specialists.length})`, icon: UserCheck }].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all ${tab === t.id ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
             <t.icon size={15} /> {t.label}
@@ -290,7 +290,7 @@ export default function AdminUsersPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-slate-800">إضافة أخصائي جديد</h2>
+              <h2 className="text-xl font-bold text-slate-800">إضافة أخصائية جديدة</h2>
               <button onClick={() => { setShowSpecForm(false); setError(''); }} className="p-2 hover:bg-slate-100 rounded-lg"><X size={20} /></button>
             </div>
             <div className="p-6 space-y-4">
@@ -311,7 +311,7 @@ export default function AdminUsersPage() {
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none" />
               <button onClick={saveSpecialist} disabled={saving}
                 className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-50">
-                {saving ? 'جاري الإضافة...' : 'إضافة الأخصائي'}
+                {saving ? 'جاري الإضافة...' : 'إضافة الأخصائية'}
               </button>
             </div>
           </div>

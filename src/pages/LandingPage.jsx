@@ -173,7 +173,7 @@ export default function LandingPage() {
             <div className="flex-1 order-1 lg:order-2">
               <div className="relative p-4">
                 <div className="absolute top-0 right-0 w-full h-full border border-dark/10 rounded-2xl translate-x-3 translate-y-3" />
-                <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=800&fit=crop" alt="Support" className="relative z-10 rounded-2xl shadow-lg grayscale hover:grayscale-0 transition-all duration-700" />
+                <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=800&fit=crop" alt="Support" className="relative z-10 rounded-2xl shadow-lg grayscale hover:grayscale-0 transition-all duration-700" />
               </div>
             </div>
           </div>
