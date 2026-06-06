@@ -170,7 +170,7 @@ export default function AuthPage({ type = 'login' }) {
         treatmentPhase: signupData.treatmentPhase,
         weight: parseFloat(signupData.weight) || null,
         height: parseFloat(signupData.height) || null,
-        dietary_restrictions: signupData.dietaryRestrictions,
+        dietaryRestrictions: signupData.dietaryRestrictions,
       });
       setStep(4);
     } catch (err) {
